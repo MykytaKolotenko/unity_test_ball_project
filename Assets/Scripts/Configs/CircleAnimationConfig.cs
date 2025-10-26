@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace Game
+namespace Configs
 {
     [CreateAssetMenu(fileName = "CircleAnimationConfig", menuName = "CircleAnimationConfig", order = 1)]
     public class CircleAnimationConfig : ScriptableObject

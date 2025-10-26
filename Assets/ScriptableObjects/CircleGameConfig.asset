@@ -16,3 +16,4 @@ MonoBehaviour:
   MinimumPlayerRadius: 50
   SquareReductionPercent: 0.1
   MinSquareReduction: 10000
+  ProjectileSpeed: 1000

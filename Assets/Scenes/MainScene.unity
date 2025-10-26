@@ -307,7 +307,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1774727380}
+      - m_Target: {fileID: 308482482}
         m_TargetAssemblyTypeName: Game.CircleGameController, Assembly-CSharp
         m_MethodName: Restart
         m_Mode: 1
@@ -570,6 +570,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 307012046}
+  - component: {fileID: 307012047}
   m_Layer: 0
   m_Name: ObstacleManager
   m_TagString: Untagged
@@ -599,6 +600,18 @@ RectTransform:
   m_AnchoredPosition: {x: -30, y: 16}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &307012047
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 307012045}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1c7bdd88ffa346c3a5a9c59b89631fff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &308482479
 GameObject:
   m_ObjectHideFlags: 0
@@ -609,6 +622,7 @@ GameObject:
   m_Component:
   - component: {fileID: 308482480}
   - component: {fileID: 308482481}
+  - component: {fileID: 308482482}
   m_Layer: 0
   m_Name: Game
   m_TagString: Untagged
@@ -652,6 +666,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 88c8ab00d6b3432e8cb70c929307bad9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &308482482
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 308482479}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ba22240d6d6d4cf0b9ed9bcfc77080cd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  projectileParent: {fileID: 1306930060}
 --- !u!1 &406358692
 GameObject:
   m_ObjectHideFlags: 0
@@ -1535,7 +1562,6 @@ GameObject:
   - component: {fileID: 1774727377}
   - component: {fileID: 1774727378}
   - component: {fileID: 1774727379}
-  - component: {fileID: 1774727380}
   - component: {fileID: 1774727382}
   m_Layer: 0
   m_Name: Game
@@ -1610,19 +1636,6 @@ MonoBehaviour:
   m_DefaultSpriteDPI: 96
   m_DynamicPixelsPerUnit: 1
   m_PresetInfoIsWorld: 0
---- !u!114 &1774727380
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1774727376}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ba22240d6d6d4cf0b9ed9bcfc77080cd, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  projectileParent: {fileID: 1306930060}
 --- !u!114 &1774727382
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1751,6 +1764,7 @@ MonoBehaviour:
   circleGameConfig: {fileID: 11400000, guid: 9fabce0ff0e67674c98baf364053bc0d, type: 2}
   circleAnimationConfig: {fileID: 11400000, guid: 4e3bdf885623da44eadea0fb99414045, type: 2}
   touchInputHandler: {fileID: 308482481}
+  obstacleManager: {fileID: 307012047}
 --- !u!4 &2090868449
 Transform:
   m_ObjectHideFlags: 0

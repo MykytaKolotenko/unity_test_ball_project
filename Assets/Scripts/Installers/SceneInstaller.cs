@@ -1,7 +1,8 @@
-﻿using Game;
-using Game.Castle;
-using Game.Input;
-using Game.Path;
+﻿using Castle;
+using Configs;
+using Input;
+using Obstacle;
+using Path;
 using Player;
 using Projectile;
 using UnityEngine;
@@ -18,6 +19,7 @@ namespace Installers
         [SerializeField] private CircleGameConfig circleGameConfig;
         [SerializeField] private CircleAnimationConfig circleAnimationConfig;
         [SerializeField] private TouchInputHandler touchInputHandler;
+        [SerializeField] private ObstacleManager obstacleManager;
 
         public override void InstallBindings()
         {
@@ -27,10 +29,11 @@ namespace Installers
             Container.Bind<CircleGameConfig>().FromInstance(circleGameConfig).AsSingle();
             Container.Bind<CircleAnimationConfig>().FromInstance(circleAnimationConfig).AsSingle();
             Container.Bind<TouchInputHandler>().FromInstance(touchInputHandler).AsSingle();
+            Container.Bind<ObstacleManager>().FromInstance(obstacleManager).AsSingle();
 
             Container.BindInterfacesAndSelfTo<PlayerModel>().AsSingle();
 
-            Container.BindFactory<ProjectileView, ProjectileViewFactory>().FromComponentInNewPrefab(projectileView);
+            Container.BindFactory<ProjectileController, ProjectileViewFactory>().FromComponentInNewPrefab(projectileView);
         }
     }
 }

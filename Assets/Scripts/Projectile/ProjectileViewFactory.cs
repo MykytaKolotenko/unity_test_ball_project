@@ -3,11 +3,11 @@ using Zenject;
 
 namespace Projectile
 {
-    public class ProjectileViewFactory : PlaceholderFactory<ProjectileView>
+    public class ProjectileViewFactory : PlaceholderFactory<ProjectileController>
     {
-        public ProjectileView Create(Transform parent, Vector3 position, float radius)
+        public ProjectileController Create(Transform parent, Vector3 position, float radius)
         {
-            ProjectileView view = base.Create();
+            ProjectileController view = base.Create();
 
             view.transform.SetParent(parent, false);
             view.transform.localPosition = position;

@@ -1,8 +1,9 @@
-﻿using DG.Tweening;
+﻿using Configs;
+using DG.Tweening;
 using UnityEngine;
 using Zenject;
 
-namespace Game.Path
+namespace Path
 {
     public class PathView : MonoBehaviour
     {

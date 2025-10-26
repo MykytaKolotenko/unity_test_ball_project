@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace Game.Castle
+namespace Castle
 {
     public class CastleView : MonoBehaviour
     {
