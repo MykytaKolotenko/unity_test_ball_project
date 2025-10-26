@@ -9,17 +9,33 @@ namespace Input
         public event Action OnTapStarted;
         public event Action OnTapEnded;
 
-        public bool IsInputEnabled { get; set; }
+        private bool _isInputEnabled;
+        public bool IsInputEnabled
+        {
+            get => _isInputEnabled;
+            set
+            {
+                _isInputEnabled = value;
+                _isPointerDown = false;
+            }
+        }
+
+        private bool _isPointerDown;
 
         public void OnPointerDown(PointerEventData eventData)
         {
-            if (!IsInputEnabled) return;
+            if (!_isInputEnabled) return;
+
+            _isPointerDown = true;
             OnTapStarted?.Invoke();
         }
 
         public void OnPointerUp(PointerEventData eventData)
         {
-            if (!IsInputEnabled) return;
+            if (!_isInputEnabled &&
+                !_isPointerDown) return;
+
+            _isPointerDown = false;
             OnTapEnded?.Invoke();
         }
     }

@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 namespace Utils
 {
@@ -25,6 +26,21 @@ namespace Utils
         public static float GetRadiusFromArea(float area)
         {
             return Mathf.Sqrt(area / Mathf.PI);
+        }
+
+        public static (float playerRadius, float projectileRadius) EvaluatePlayerAndProjectileRadius(float playerRadius, float projectileRadius,
+            float squareReductionPercent, float minSquareReduction)
+        {
+            float playerCircleSquare = CalculateCircleArea(playerRadius);
+            float squareDelta = Math.Max(playerCircleSquare * squareReductionPercent * Time.deltaTime, minSquareReduction * Time.deltaTime);
+            float currentPlayerCircleSquare = playerCircleSquare - squareDelta;
+            float currentPlayerRadius = GetRadiusFromArea(currentPlayerCircleSquare);
+
+            float projectileCircleSquare = CalculateCircleArea(projectileRadius);
+            float currentProjectileSquare = projectileCircleSquare + squareDelta;
+            float currentProjectileRadius = GetRadiusFromArea(currentProjectileSquare);
+
+            return (currentPlayerRadius, currentProjectileRadius);
         }
     }
 }

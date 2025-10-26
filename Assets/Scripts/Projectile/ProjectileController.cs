@@ -16,7 +16,6 @@ namespace Projectile
         [Inject] private ObstacleManager _obstacleManager;
         [Inject] private CircleGameConfig _circleGameConfig;
 
-        private bool canMove = true;
         private CancellationTokenSource _cts;
 
         public event Action<Vector2> OnObstacleHit;
@@ -40,7 +39,7 @@ namespace Projectile
 
             _cts = new CancellationTokenSource();
 
-            while (!_cts.IsCancellationRequested)
+            while (_cts is { IsCancellationRequested: false })
             {
                 float stepDistance = _circleGameConfig.ProjectileSpeed * Time.deltaTime;
 
@@ -62,6 +61,7 @@ namespace Projectile
         {
             _cts?.Cancel();
             _cts?.Dispose();
+            _cts = null;
         }
 
         public void RemoveProjectile()

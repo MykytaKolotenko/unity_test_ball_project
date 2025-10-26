@@ -1,5 +1,6 @@
 ﻿using Castle;
 using Configs;
+using Game;
 using Input;
 using Obstacle;
 using Path;
@@ -20,6 +21,9 @@ namespace Installers
         [SerializeField] private CircleAnimationConfig circleAnimationConfig;
         [SerializeField] private TouchInputHandler touchInputHandler;
         [SerializeField] private ObstacleManager obstacleManager;
+        [SerializeField] private CircleGameController circleGameController;
+        [SerializeField] private GameManager gameManager;
+        [SerializeField] private UIController uiController;
 
         public override void InstallBindings()
         {
@@ -30,6 +34,9 @@ namespace Installers
             Container.Bind<CircleAnimationConfig>().FromInstance(circleAnimationConfig).AsSingle();
             Container.Bind<TouchInputHandler>().FromInstance(touchInputHandler).AsSingle();
             Container.Bind<ObstacleManager>().FromInstance(obstacleManager).AsSingle();
+            Container.Bind<CircleGameController>().FromInstance(circleGameController).AsSingle();
+            Container.Bind<GameManager>().FromInstance(gameManager).AsSingle();
+            Container.Bind<UIController>().FromInstance(uiController).AsSingle();
 
             Container.BindInterfacesAndSelfTo<PlayerModel>().AsSingle();
 

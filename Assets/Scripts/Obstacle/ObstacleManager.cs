@@ -8,6 +8,11 @@ namespace Obstacle
     {
         private readonly List<ObstacleController> _obstacles = new List<ObstacleController>();
 
+        public void Reinit()
+        {
+            _obstacles.ForEach(value => value.gameObject.SetActive(true));
+        }
+
         public void Add(ObstacleController obstacle)
         {
             _obstacles.Add(obstacle);
@@ -15,8 +20,7 @@ namespace Obstacle
 
         public void Remove(ObstacleController obstacle)
         {
-            Destroy(obstacle.gameObject);
-            _obstacles.Remove(obstacle);
+            obstacle.gameObject.SetActive(false);
         }
 
         public void DestroyObstaclesByRadius(float radius, Vector3 position)
@@ -32,8 +36,7 @@ namespace Obstacle
 
                 if (distance <= radius)
                 {
-                    Destroy(obstacle.gameObject);
-                    _obstacles.Remove(obstacle);
+                    Remove(obstacle);
                 }
             }
         }

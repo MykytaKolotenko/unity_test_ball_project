@@ -3,6 +3,7 @@ using System.Threading;
 using Castle;
 using Configs;
 using Cysharp.Threading.Tasks;
+using DG.Tweening;
 using Input;
 using Obstacle;
 using Path;
@@ -17,6 +18,8 @@ namespace Game
     public class CircleGameController : MonoBehaviour
     {
         [SerializeField] private RectTransform projectileParent;
+        [SerializeField] private LayerMask collisionLayerMask;
+
         [Inject] private PlayerModel _model;
         [Inject] private CircleGameConfig _circleGameConfig;
 
@@ -33,6 +36,9 @@ namespace Game
         private CancellationTokenSource _cts;
         private Quaternion _rotation;
         private Vector2 _direction;
+        private Sequence _playerMoveSequence;
+
+        public event Action<bool> OnGameOver;
 
         private void Awake()
         {
@@ -40,15 +46,15 @@ namespace Game
             _rotation = MathUtils.GetAngle(_direction);
         }
 
-        private void Start()
-        {
-            Init();
-        }
-
         public void Restart()
         {
-            Destroy(_projectileController.gameObject);
-            _projectileController = null;
+            if (_projectileController != null)
+            {
+                Destroy(_projectileController.gameObject);
+                _projectileController = null;
+            }
+
+            _obstacleManager.Reinit();
 
             Init();
         }
@@ -58,7 +64,7 @@ namespace Game
             _model.SetRadius(_circleGameConfig.PlayerRadius);
 
             _playerView.Init(_circleGameConfig.PlayerRadius);
-            _pathView.Init(_circleGameConfig.PlayerRadius * 2, EvaluatePathDistance(), _rotation);
+            _pathView.Init(_circleGameConfig.PlayerRadius * 2, EvaluatePathDistance(_playerView.Position), _rotation);
 
             _inputHandler.IsInputEnabled = true;
         }
@@ -73,21 +79,31 @@ namespace Game
         {
             _inputHandler.OnTapStarted -= CreateProjectile;
             _inputHandler.OnTapEnded -= ShootProjectile;
+
+            _playerMoveSequence.Kill();
+            _playerMoveSequence = null;
+        }
+
+        private void SubscribeToProjectile(ProjectileController projectile)
+        {
+            projectile.OnObstacleHit += OnObstacleHit;
+            projectile.OnProjectileWayEnd += OnProjectileDestroyed;
+        }
+
+        private void UnsubscribeToProjectile(ProjectileController projectile)
+        {
+            projectile.OnObstacleHit -= OnObstacleHit;
+            projectile.OnProjectileWayEnd -= OnProjectileDestroyed;
         }
 
         private void ShootProjectile()
         {
-            try
-            {
-                _cts?.Cancel();
-                _cts?.Dispose();
+            if (_projectileController == null) return;
 
-                _projectileController.Move(_direction, EvaluatePathDistance()).Forget();
-            }
-            catch (Exception e)
-            {
-                // over clicking
-            }
+            _inputHandler.IsInputEnabled = false;
+            ClearToken();
+
+            _projectileController.Move(_direction, EvaluatePathDistance(_playerView.Position)).Forget();
         }
 
         private void CreateProjectile()
@@ -98,34 +114,53 @@ namespace Game
             _projectileController = _projectileViewFactory.Create(projectileParent, spawnPosition, 0);
             SubscribeToProjectile(_projectileController);
 
-            TransferCircleSquare();
+            TransferCircleSquare().Forget();
         }
 
-        private void SubscribeToProjectile(ProjectileController projectile)
-        {
-            projectile.OnObstacleHit += OnObstacleHit;
-            projectile.OnProjectileWayEnd += OnProjectileDestroed;
-        }
-
-        private void UnsubscribeToProjectile(ProjectileController projectile)
-        {
-            projectile.OnObstacleHit -= OnObstacleHit;
-            projectile.OnProjectileWayEnd -= OnProjectileDestroed;
-        }
-
-        private void OnObstacleHit(Vector2 obj)
+        private void OnObstacleHit(Vector2 obstaclePos)
         {
             UnsubscribeToProjectile(_projectileController);
 
-            _obstacleManager.DestroyObstaclesByRadius(_projectileController.Radius, obj);
+            AsyncOnObstacleHit(obstaclePos).Forget();
+        }
+
+        private async UniTask AsyncOnObstacleHit(Vector2 obstaclePos)
+        {
+            _obstacleManager.DestroyObstaclesByRadius(_projectileController.Radius, obstaclePos);
 
             _projectileController.RemoveProjectile();
             _projectileController = null;
 
+            float distance = Vector3.Distance(_playerView.Position, obstaclePos) - _model.Radius * 2;
+            Vector2 distancePos = distance * _direction.normalized;
+            Vector3 pos = _playerView.LocalPosition + new Vector3(distancePos.x, distancePos.y, 0);
+            CreateMoveSequence(pos);
+
+            await _playerMoveSequence.AsyncWaitForCompletion();
+            await TryEndGame();
+        }
+
+        private async UniTask TryEndGame()
+        {
+            bool isWinGame = !ColliderUtils.IsRectTransformCollidingWithObstacles(_pathView.PathRectTransform, collisionLayerMask);
+
+            if (isWinGame)
+            {
+                await MoveToDestination();
+                OnGameOver?.Invoke(true);
+                return;
+            }
+
+            if (_model.Radius < _circleGameConfig.MinimumPlayerRadius)
+            {
+                OnGameOver?.Invoke(false);
+                return;
+            }
+
             _inputHandler.IsInputEnabled = true;
         }
 
-        private void OnProjectileDestroed()
+        private void OnProjectileDestroyed()
         {
             _projectileController.RemoveProjectile();
             _inputHandler.IsInputEnabled = true;
@@ -135,40 +170,60 @@ namespace Game
         {
             _cts = new CancellationTokenSource();
 
-            while (!_cts.IsCancellationRequested &&
-                   _model.Radius > _circleGameConfig.MinimumPlayerRadius)
+            while (_cts is { IsCancellationRequested: false })
             {
-                (float playerRadius, float projectileRadius) = EvaluatePlayerAndProjectileRadius();
+                if (_model.Radius >= _circleGameConfig.MinimumPlayerRadius)
+                {
+                    (float playerRadius, float projectileRadius) = MathUtils.EvaluatePlayerAndProjectileRadius(
+                        _model.Radius,
+                        _projectileController.Radius,
+                        _circleGameConfig.SquareReductionPercent,
+                        _circleGameConfig.MinSquareReduction
+                    );
 
-                _model.SetRadius(playerRadius);
-                _playerView.SetRadius(playerRadius);
-                _pathView.SetWidth(playerRadius * 2);
-                _projectileController.SetRadius(projectileRadius);
+                    _model.SetRadius(playerRadius);
+                    _playerView.SetRadius(playerRadius);
+                    _pathView.SetWidth(playerRadius * 2);
+                    _projectileController.SetRadius(projectileRadius);
+                }
+                else
+                {
+                    ShootProjectile();
+                    return;
+                }
 
                 await UniTask.Yield(PlayerLoopTiming.Update);
             }
+        }
 
+        public async UniTask MoveToDestination()
+        {
             _inputHandler.IsInputEnabled = false;
+            CreateMoveSequence(_castleView.Position, false);
+            await _playerMoveSequence.AsyncWaitForCompletion();
         }
 
-        private (float playerRadius, float projectileRadius) EvaluatePlayerAndProjectileRadius()
+        private void CreateMoveSequence(Vector3 pos, bool hasPathView = true)
         {
-            float playerCircleSquare = MathUtils.CalculateCircleArea(_model.Radius);
-            float squareDelta = Math.Max(playerCircleSquare * _circleGameConfig.SquareReductionPercent * Time.deltaTime,
-                _circleGameConfig.MinSquareReduction * Time.deltaTime);
-            float currentPlayerCircleSquare = playerCircleSquare - squareDelta;
-            float currentPlayerRadius = MathUtils.GetRadiusFromArea(currentPlayerCircleSquare);
+            _playerMoveSequence = DOTween.Sequence();
 
-            float projectileCircleSquare = MathUtils.CalculateCircleArea(_projectileController.Radius);
-            float currentProjectileSquare = projectileCircleSquare + squareDelta;
-            float currentProjectileRadius = MathUtils.GetRadiusFromArea(currentProjectileSquare);
+            float pathHeight = hasPathView ? EvaluatePathDistance(pos) : 0f;
 
-            return (currentPlayerRadius, currentProjectileRadius);
+            _playerMoveSequence.Append(_playerView.MoveTo(pos));
+            _playerMoveSequence.Join(_pathView.SetHeightAnimated(pathHeight));
+            _playerMoveSequence.Join(_pathView.SetPositionAnimated(pos));
         }
 
-        private float EvaluatePathDistance()
+        private float EvaluatePathDistance(Vector2 playerPos)
         {
-            return Vector3.Distance(_playerView.Position, _castleView.Position);
+            return Vector3.Distance(playerPos, _castleView.Position);
+        }
+
+        private void ClearToken()
+        {
+            _cts?.Cancel();
+            _cts?.Dispose();
+            _cts = null;
         }
     }
 }

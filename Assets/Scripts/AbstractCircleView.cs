@@ -15,6 +15,13 @@ public abstract class AbstractCircleView : MonoBehaviour
 
     public float Radius { get; protected set; }
 
+    protected Vector3 StartPosition { get; private set; }
+
+    private void Awake()
+    {
+        StartPosition = circleTransform.position;
+    }
+
     public void Init(float radius)
     {
         SetRadius(radius);
