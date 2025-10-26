@@ -1,6 +1,7 @@
 ﻿using Configs;
 using DG.Tweening;
 using UnityEngine;
+using Utils;
 using Zenject;
 
 namespace Path
@@ -37,7 +38,7 @@ namespace Path
 
         public Tween SetPositionAnimated(Vector3 position)
         {
-            return PathRectTransform.DOLocalJump(position, 10f, 1, _circleAnimationConfig.moveTweenDuration);
+            return AnimationUtils.JumpTo(PathRectTransform, position, _circleAnimationConfig.moveTweenDuration);
         }
     }
 }

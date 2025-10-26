@@ -6,6 +6,6 @@ namespace Castle
     {
         [SerializeField] private RectTransform castleTransform;
 
-        public Vector3 Position => castleTransform.position;
+        public Vector3 LocalPosition => castleTransform.localPosition;
     }
 }

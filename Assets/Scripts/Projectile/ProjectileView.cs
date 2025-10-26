@@ -1,13 +1,6 @@
-﻿using DG.Tweening;
-using UnityEngine;
-
-namespace Projectile
+﻿namespace Projectile
 {
     public class ProjectileView : AbstractCircleView
     {
-        public override Tween MoveTo(Vector3 position)
-        {
-            return circleTransform.DOJump(position, 1, 3, CircleAnimationConfig.moveTweenDuration);
-        }
     }
 }

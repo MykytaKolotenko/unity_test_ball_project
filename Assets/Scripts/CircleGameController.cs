@@ -42,7 +42,7 @@ namespace Game
 
         private void Awake()
         {
-            _direction = _castleView.Position - _playerView.Position;
+            _direction = _castleView.LocalPosition - _playerView.LocalPosition;
             _rotation = MathUtils.GetAngle(_direction);
         }
 
@@ -64,7 +64,7 @@ namespace Game
             _model.SetRadius(_circleGameConfig.PlayerRadius);
 
             _playerView.Init(_circleGameConfig.PlayerRadius);
-            _pathView.Init(_circleGameConfig.PlayerRadius * 2, EvaluatePathDistance(_playerView.Position), _rotation);
+            _pathView.Init(_circleGameConfig.PlayerRadius * 2, EvaluatePathDistance(_playerView.LocalPosition), _rotation);
 
             _inputHandler.IsInputEnabled = true;
         }
@@ -103,7 +103,7 @@ namespace Game
             _inputHandler.IsInputEnabled = false;
             ClearToken();
 
-            _projectileController.Move(_direction, EvaluatePathDistance(_playerView.Position)).Forget();
+            _projectileController.Move(_direction, EvaluatePathDistance(_playerView.LocalPosition)).Forget();
         }
 
         private void CreateProjectile()
@@ -131,7 +131,7 @@ namespace Game
             _projectileController.RemoveProjectile();
             _projectileController = null;
 
-            float distance = Vector3.Distance(_playerView.Position, obstaclePos) - _model.Radius * 2;
+            float distance = Vector3.Distance(_playerView.LocalPosition, obstaclePos) - _model.Radius * 2;
             Vector2 distancePos = distance * _direction.normalized;
             Vector3 pos = _playerView.LocalPosition + new Vector3(distancePos.x, distancePos.y, 0);
             CreateMoveSequence(pos);
@@ -142,7 +142,7 @@ namespace Game
 
         private async UniTask TryEndGame()
         {
-            bool isWinGame = !ColliderUtils.IsRectTransformCollidingWithObstacles(_pathView.PathRectTransform, collisionLayerMask);
+            bool isWinGame = !ColliderUtils.IsRectTransformCollidingWithObstacles(_pathView.PathRectTransform, _direction, collisionLayerMask);
 
             if (isWinGame)
             {
@@ -199,7 +199,7 @@ namespace Game
         public async UniTask MoveToDestination()
         {
             _inputHandler.IsInputEnabled = false;
-            CreateMoveSequence(_castleView.Position, false);
+            CreateMoveSequence(_castleView.LocalPosition, false);
             await _playerMoveSequence.AsyncWaitForCompletion();
         }
 
@@ -214,9 +214,9 @@ namespace Game
             _playerMoveSequence.Join(_pathView.SetPositionAnimated(pos));
         }
 
-        private float EvaluatePathDistance(Vector2 playerPos)
+        private float EvaluatePathDistance(Vector2 playerLocalPos)
         {
-            return Vector3.Distance(playerPos, _castleView.Position);
+            return Vector3.Distance(playerLocalPos, _castleView.LocalPosition);
         }
 
         private void ClearToken()

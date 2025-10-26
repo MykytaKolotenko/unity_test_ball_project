@@ -5,12 +5,20 @@ namespace Utils
 {
     public static class ColliderUtils
     {
-        public static bool IsRectTransformCollidingWithObstacles(RectTransform pictureTransform, LayerMask collisionLayerMask)
+        public static bool IsRectTransformCollidingWithObstacles(RectTransform pictureTransform, Vector2 direction, LayerMask collisionLayerMask)
         {
-            Vector2 size = pictureTransform.sizeDelta;
+            Vector2 size = pictureTransform.rect.size;
             Vector2 position = pictureTransform.transform.position;
 
-            Collider2D[] collision = Physics2D.OverlapBoxAll(position, size, pictureTransform.eulerAngles.z, collisionLayerMask);
+            Vector2 offset = direction.normalized * (size.magnitude / 2);
+            Vector2 newPos = position + offset;
+
+            Collider2D[] collision = Physics2D.OverlapBoxAll(
+                newPos,
+                size,
+                pictureTransform.eulerAngles.z,
+                collisionLayerMask
+            );
 
             return collision.Any(value => value.CompareTag("Obstacle"));
         }

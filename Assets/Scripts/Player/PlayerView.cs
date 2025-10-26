@@ -1,5 +1,6 @@
 ﻿using DG.Tweening;
 using UnityEngine;
+using Utils;
 
 namespace Player
 {
@@ -11,9 +12,9 @@ namespace Player
             circleTransform.transform.position = StartPosition;
         }
 
-        public override Tween MoveTo(Vector3 position)
+        public Tween MoveTo(Vector3 position)
         {
-            return circleTransform.DOLocalJump(position, 10f, 1, CircleAnimationConfig.moveTweenDuration);
+            return AnimationUtils.JumpTo(circleTransform, position, CircleAnimationConfig.moveTweenDuration);
         }
     }
 }
