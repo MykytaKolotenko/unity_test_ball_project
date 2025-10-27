@@ -13,6 +13,7 @@ namespace Configs
         public float ProjectileSpeed;
 
         public float StopPositionMultiplier = 2f;
+        public float MovePositionThreshold = 20f;
         public float DoorOpenDistance = 200f;
     }
 }

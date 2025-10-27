@@ -13,9 +13,10 @@ MonoBehaviour:
   m_Name: CircleGameConfig
   m_EditorClassIdentifier: 
   PlayerRadius: 100
-  MinimumPlayerRadius: 10
+  MinimumPlayerRadius: 30
   SquareReductionPercent: 0.1
   MinSquareReduction: 10000
   ProjectileSpeed: 1000
   StopPositionMultiplier: 2
+  MovePositionThreshold: 50
   DoorOpenDistance: 500

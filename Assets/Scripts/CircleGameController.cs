@@ -141,7 +141,7 @@ namespace Game
 
             float dis = Vector3.Distance(pos, _playerView.LocalPosition);
 
-            if (dis > 10f &&
+            if (dis > _circleGameConfig.MovePositionThreshold &&
                 pos != Vector3.zero)
             {
                 CreateMoveSequence(pos);
