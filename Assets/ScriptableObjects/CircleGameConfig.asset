@@ -17,3 +17,5 @@ MonoBehaviour:
   SquareReductionPercent: 0.1
   MinSquareReduction: 10000
   ProjectileSpeed: 1000
+  StopPositionMultiplier: 2
+  DoorOpenDistance: 500

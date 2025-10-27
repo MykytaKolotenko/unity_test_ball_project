@@ -11,5 +11,8 @@ namespace Configs
         public float MinSquareReduction = 10000f;
 
         public float ProjectileSpeed;
+
+        public float StopPositionMultiplier = 2f;
+        public float DoorOpenDistance = 200f;
     }
 }

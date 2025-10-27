@@ -65,6 +65,7 @@ namespace Game
 
             _playerView.Init(_circleGameConfig.PlayerRadius);
             _pathView.Init(_circleGameConfig.PlayerRadius * 2, EvaluatePathDistance(_playerView.LocalPosition), _rotation);
+            _castleView.Init();
 
             _inputHandler.IsInputEnabled = true;
         }
@@ -131,12 +132,30 @@ namespace Game
             _projectileController.RemoveProjectile();
             _projectileController = null;
 
-            float distance = Vector3.Distance(_playerView.LocalPosition, obstaclePos) - _model.Radius * 2;
+            Vector2 nearestColliderPos =
+                ColliderUtils.GetClosestPointOnRectTransform(_pathView.PathRectTransform, _direction, collisionLayerMask, _playerView.LocalPosition);
+
+            float distance = Vector3.Distance(_playerView.LocalPosition, nearestColliderPos) - _model.Radius * _circleGameConfig.StopPositionMultiplier;
             Vector2 distancePos = distance * _direction.normalized;
             Vector3 pos = _playerView.LocalPosition + new Vector3(distancePos.x, distancePos.y, 0);
-            CreateMoveSequence(pos);
 
-            await _playerMoveSequence.AsyncWaitForCompletion();
+            float dis = Vector3.Distance(pos, _playerView.LocalPosition);
+
+            if (dis > 10f &&
+                pos != Vector3.zero)
+            {
+                CreateMoveSequence(pos);
+                await _playerMoveSequence.AsyncWaitForCompletion();
+            }
+
+            float pathDistance = EvaluatePathDistance(_playerView.LocalPosition);
+
+            if (!_castleView.IsDoorOpen &&
+                pathDistance < _circleGameConfig.DoorOpenDistance)
+            {
+                _castleView.OpenDoor();
+            }
+
             await TryEndGame();
         }
 
