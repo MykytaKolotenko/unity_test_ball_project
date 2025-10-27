@@ -18,5 +18,5 @@ MonoBehaviour:
   MinSquareReduction: 10000
   ProjectileSpeed: 1000
   StopPositionMultiplier: 2
-  MovePositionThreshold: 50
+  MovePositionThreshold: 200
   DoorOpenDistance: 500
